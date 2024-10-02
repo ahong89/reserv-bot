@@ -14,11 +14,13 @@ def init_table():
     )
     """
     cursor.execute(init_command)
+    connection.commit()
 
 def delete_table():
     drop_command = """DROP TABLE users
     """
     cursor.execute(drop_command)
+    connection.commit()
 
 def create_profile(uid, fname, lname, school_uid, email):
     create_command = f"""INSERT INTO users
@@ -31,11 +33,13 @@ def create_profile(uid, fname, lname, school_uid, email):
         )
     """
     cursor.execute(create_command)
+    connection.commit()
 
 def delete_profile(uid):
     if user_exist(uid):
         delete_command = f"DELETE FROM users WHERE uid = {uid}"
         cursor.execute(delete_command)
+        connection.commit()
         return True
     else:
         return False
@@ -46,6 +50,7 @@ def update_profile(uid, attribute, new_value):
         WHERE uid = '{uid}'
     """
     cursor.execute(update_command)
+    connection.commit()
 
 def user_exist(uid):
     find_user_command = f"SELECT EXISTS(SELECT 1 FROM users WHERE uid = '{uid}')"
@@ -75,3 +80,4 @@ def convert_tuple_to_dict(tuple):
 
 def close_connection():
     connection.close()
+
