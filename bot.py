@@ -6,6 +6,7 @@ import os
 import dotenv
 
 import api_calls
+import manage_db
 
 def get_token():
     dotenv.load_dotenv()
@@ -27,3 +28,4 @@ async def on_ready():
 
 if __name__ == "__main__":
     bot.run(get_token())
+    manage_db.close_connection()
