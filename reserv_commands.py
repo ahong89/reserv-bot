@@ -25,7 +25,6 @@ async def reserve(ctx, earliest_time=None, min_duration=None):
     available_slots_msg += "Response with #<number reservation you want>"
     await ctx.send(available_slots_msg)
     user_data = db.get_user(ctx.author.id)
-    print(user_data)
 
     def check(m):
         return m.author.id == ctx.author.id and m.channel == ctx.channel

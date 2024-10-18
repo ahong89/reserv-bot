@@ -129,8 +129,37 @@ def find_checksum(slot):
         "end": get_day(day_offset=1) 
     }
     r = requests.post(base_url, params=payload, headers=headers)
-    json = r.json()
-    return json['bookings'][0]['checksum']
+    bookings = r.json()['bookings'][0]
+
+    # check if end is correct otherwise make an adjustment
+    original_checksum = bookings['checksum']
+    if bookings['end'] == slot['end']: 
+        return bookings['checksum']
+    
+    index = 0
+    for i, option in enumerate(bookings['options']):
+        if option == slot['end']:
+            index = i
+    payload = {
+        "update[id]": 1,
+        "update[checksum]": bookings['optionChecksums'][index],
+        "update[end]": slot['end'],
+        "lid": LID,
+        "gid": GID,
+        "start": get_day(),
+        "end": get_day(1),
+        "bookings[0][id]": 1,
+        "bookings[0][eid]": slot['eid'],
+        "bookings[0][seat_id]": 0,
+        "bookings[0][gid]": GID,
+        "bookings[0][lid]": LID,
+        "bookings[0][start]": slot['start'],
+        "bookings[0][end]": slot['end'],
+        "bookings[0][checksum]": original_checksum
+    }
+    r = requests.post(base_url, params=payload, headers=headers)
+    new_checksum = r.json()['bookings'][0]['checksum']
+    return new_checksum
 
 def make_booking(user_data, slot):
     payload = user_data
@@ -147,12 +176,8 @@ def make_booking(user_data, slot):
         "end": slot['end'],
         "checksum": find_checksum(slot),
     }
-    print(slot["checksum"])
-    print(find_checksum(slot))
     booking_str = "[{" + ",".join(f"\"{k}\":{v if isinstance(v, (int)) else '\"'+str(v)+'\"'}" for k,v in booking_data.items()) + "}]"
-    print(booking_str)
     payload['bookings'] = booking_str
-    #[{"id":1,"eid":86501,"seat_id":0,"gid":23067,"lid":2552,"start":"2024-10-18 15:30:00","end":"2024-10-18 16:00:00","checksum":"053eca29ddb26bd8b954917df9279c77"}]
 
     payload.pop('uid')
     payload.pop('school_uid')
@@ -165,8 +190,6 @@ def make_booking(user_data, slot):
     p = r.prepare()
     p.url += payload_str
     resp = session.send(p)
-
-    print(resp.url)
     return resp.status_code
     
 
