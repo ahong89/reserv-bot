@@ -1,6 +1,8 @@
 import requests
 import json
 
+NUM_SHOWN_SLOTS = 3
+
 def retrieve_data():
     payload = {
         "lid": 2552,
@@ -19,6 +21,7 @@ def retrieve_data():
     }
     r = requests.post('https://umd.libcal.com/spaces/availability/grid', params=payload, headers=headers)
     all_slots = r.json()["slots"]
+    print(all_slots)
 
     available_slots = {}
     for slot in all_slots:
@@ -87,12 +90,20 @@ def subtract_time(period):
 def sort_slots(slots):
     return sorted(slots, key=lambda x: (x["start"] + " " + x["duration"]))
 
+def find_slots(requirements):
+    available_slots = retrieve_data()
+    print(available_slots)
+    fitting_slots = fit_requirements(available_slots, requirements)
+    sorted_slots = sort_slots(fitting_slots)
+    return sorted_slots
+
 if __name__ == '__main__':
+    # for testing purposes
     available_slots = retrieve_data()
     print(available_slots)
     reqs = { #then find the soonest time
-        "earliest-start": "2024-10-01 20:00:00", #hard
-        "min-duration": "01:00:00" #hard h:m:s
+        "earliest-start": "2024-10-02 15:00:00", #hard
+        "min-duration": "00:30:00" #hard h:m:s
     } # sort by start then duration?
 
     fitting_slots = fit_requirements(available_slots, reqs)

@@ -1,13 +1,12 @@
 import discord
 from discord.ext import commands
-from typing import Optional
 
-import requests
 import os
 import dotenv
 
-import api_calls
 import manage_db as db
+import profile_commands
+import reserv_commands
 
 def get_token():
     dotenv.load_dotenv()
@@ -18,14 +17,13 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-import profile_commands
-
 @bot.event
 async def on_ready():
     print(f' {bot.user} has logged on !')
 
     await bot.load_extension('profile_commands')
-    
+    await bot.load_extension('reserv_commands')
+
     await bot.tree.sync()
 
 if __name__ == "__main__":

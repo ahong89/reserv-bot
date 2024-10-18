@@ -2,7 +2,6 @@ from discord.ext import commands
 
 import manage_db as db
 
-# possible arguments (Andrew Hong ahong89@terpmail.umd.edu 120883101) (Andrew Hong) (*noargs)
 @commands.hybrid_command(name="createprofile")
 async def create_profile(ctx, fname=None, lname=None, email=None, school_uid=None):
     if db.user_exist(ctx.author.id):
