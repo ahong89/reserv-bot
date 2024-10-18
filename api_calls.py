@@ -1,5 +1,6 @@
 import requests
 from urllib.request import urlopen
+from bs4 import BeautifulSoup
 import json
 from util import get_day, subtract_time
 
@@ -129,6 +130,7 @@ def find_checksum(slot):
         "end": get_day(day_offset=1) 
     }
     r = requests.post(base_url, params=payload, headers=headers)
+    print("First checksum:", r.text, end='\n\n')
     bookings = r.json()['bookings'][0]
     # check if end is correct otherwise make an adjustment
     original_checksum = bookings['checksum']
@@ -158,6 +160,7 @@ def find_checksum(slot):
         "bookings[0][checksum]": original_checksum
     }
     r = requests.post(base_url, params=payload, headers=headers)
+    print("Second checksum:", r.text)
     new_checksum = r.json()['bookings'][0]['checksum']
     return new_checksum
 
@@ -190,8 +193,34 @@ def make_booking(user_data, slot):
     p = r.prepare()
     p.url += payload_str
     resp = session.send(p)
-    return resp.status_code
-    
+    if resp.status_code == 200:
+        return resp.status_code, resp.json()['bookId']
+    else:
+        return resp.status_code, 0
+
+def cancel_booking(bookId):
+    payload = {
+        "id": bookId
+    }
+    baseUrl = 'https://umd.libcal.com/equipment/cancel'
+    html = requests.get(baseUrl, params=payload)
+    soup = BeautifulSoup(html.text, 'html.parser')
+
+    all_tr = soup.find_all("tr")
+    secret = ""
+    for tr in all_tr:
+        id = tr.get('id')
+        if id and id[:7] == "booking":
+            secret=id[8:]
+
+    baseUrl = 'https://umd.libcal.com/ajax/equipment/cancel/'
+    baseUrl += bookId + '/'
+    baseUrl += secret
+    headers = {
+        "Referer": 'https://umd.libcal.com/equipment/cancel?id=' + bookId
+    }
+    r = requests.post(baseUrl, headers=headers)
+    return r.json()["success"]
 
 if __name__ == '__main__':
     reqs = { #then find the soonest time

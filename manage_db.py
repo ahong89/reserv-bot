@@ -4,7 +4,7 @@ connection = sqlite3.connect('user_data.db')
 cursor = connection.cursor()
 
 def init_table():
-    init_command = """CREATE TABLE
+    init_users_command = """CREATE TABLE IF NOT EXISTS
     users(
         uid TEXT PRIMARY KEY, 
         fname TEXT, 
@@ -13,7 +13,18 @@ def init_table():
         email TEXT
     )
     """
-    cursor.execute(init_command)
+    init_bookings_command = """CREATE TABLE IF NOT EXISTS
+    bookings(
+        bookId TEXT PRIMARY KEY,
+        day TEXT,
+        start_time TEXT,
+        end_time TEXT,
+        discord_uid TEXT,
+        FOREIGN KEY("discord_uid") REFERENCES "users"("uid")
+    )
+    """
+    cursor.execute(init_users_command)
+    cursor.execute(init_bookings_command)
     connection.commit()
 
 def delete_table():
@@ -78,6 +89,32 @@ def convert_tuple_to_dict(tuple):
     }
     return output
 
+def add_booking(bookId, day, start_time, end_time, uid):
+    add_command = f"""INSERT INTO bookings
+        VALUES(
+            '{bookId}',
+            '{day}',
+            '{start_time}',
+            '{end_time}',
+            '{uid}'
+        )
+    """
+    cursor.execute(add_command)
+    connection.commit()
+
+def get_all_bookings(uid):
+    get_command = f"SELECT * FROM bookings WHERE discord_uid='{uid}' AND day >= date('now','localtime')" 
+    cursor.execute(get_command)
+    return cursor.fetchall()
+
+def delete_booking(bookId):
+    delete_command = f"DELETE FROM bookings WHERE bookId='{bookId}'"
+    cursor.execute(delete_booking)
+    connection.commit()
+
 def close_connection():
     connection.close()
 
+if __name__ == '__main__':
+    init_table()
+    close_connection()

@@ -1,21 +1,24 @@
-GID = 23067
-LID = 2552
-slot = {
-    'itemId': 86443,
-    'start': '2024-10-18 10:00:00',
-    'end': '2042-10-18 12:00:00',
-    "checksum": '9e89eea551b593a3d0a075c5315c0d37'
+import requests
+from bs4 import BeautifulSoup
+
+headers = {
+    "Referer": "https://umd.libcal.com/spaces?lid=2552&gid=23067&c=0"
 }
 
-booking_data = {
-        "id": 1,
-        "eid": slot['itemId'],
-        "seat_id": 0,
-        "gid": GID,
-        "lid": LID,
-        "start": slot['start'],
-        "end": slot['end'],
-        "checksum": slot['checksum'],
-    }
-booking_str = "[{" + ",".join(f"\"{k}\":{v if isinstance(v, (int)) else '\"'+str(v)+'\"'}" for k,v in booking_data.items()) + "}]"
-print(booking_str)
+bookId = 'cs_NMLKV1cV'
+payload = {
+    "id": bookId
+}
+
+baseUrl = 'https://umd.libcal.com/equipment/cancel'
+html = requests.get(baseUrl, params=payload)
+soup = BeautifulSoup(html.text, 'html.parser')
+
+all_tr = soup.find_all("tr")
+secret = ""
+for tr in all_tr:
+    id = tr.get('id')
+    if id and id[:7] == "booking":
+        secret=id[8:]
+
+print(secret)
