@@ -13,7 +13,6 @@ async def reserve(ctx, earliest_time=None, min_duration=None):
         "min-duration": min_duration
     }
     slots = find_slots(requirements)
-    print(slots)
 
     available_slots_msg = "Here's a list of 3 available slots that fit your requirements:\n\n"
     for i, s in enumerate(slots):

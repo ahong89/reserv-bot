@@ -1,7 +1,7 @@
 import requests
 from urllib.request import urlopen
 import json
-from util import get_day
+from util import get_day, subtract_time
 
 NUM_SHOWN_SLOTS = 3
 GID = 23067
@@ -48,11 +48,11 @@ def fit_requirements(available, requirements):
             # print(block)
             if(block["start"] < requirements["earliest-start"]):
                 block["start"] = requirements["earliest-start"]
-            fit_min_duration = subtract_time(block) >= requirements["min-duration"]
+            fit_min_duration = calc_duration(block) >= requirements["min-duration"]
             fit_start_time = block["end"] > requirements["earliest-start"]
             # print(block, fit_min_duration, fit_start_time)
             if fit_min_duration and fit_start_time:
-                block["duration"] = subtract_time(block)
+                block["duration"] = calc_duration(block)
                 best_fit.append(block)
     return best_fit
                 
@@ -78,7 +78,7 @@ def compare_slot(slot1, slot2):
     else:
         return slot1
     
-def subtract_time(period):
+def calc_duration(period):
     start_parsed = parse_time(period["start"])
     end_parsed = parse_time(period["end"])
     hour_value = end_parsed["hour"] - start_parsed["hour"]
@@ -130,7 +130,6 @@ def find_checksum(slot):
     }
     r = requests.post(base_url, params=payload, headers=headers)
     bookings = r.json()['bookings'][0]
-
     # check if end is correct otherwise make an adjustment
     original_checksum = bookings['checksum']
     if bookings['end'] == slot['end']: 
@@ -140,21 +139,22 @@ def find_checksum(slot):
     for i, option in enumerate(bookings['options']):
         if option == slot['end']:
             index = i
+    end_time = slot['end'].split(" ")[0] + " " + subtract_time(slot['end'].split(" ")[1], "00:30:00")
     payload = {
-        "update[id]": 1,
+        "update[id]": bookings['id'],
         "update[checksum]": bookings['optionChecksums'][index],
         "update[end]": slot['end'],
         "lid": LID,
         "gid": GID,
         "start": get_day(),
         "end": get_day(1),
-        "bookings[0][id]": 1,
-        "bookings[0][eid]": slot['eid'],
+        "bookings[0][id]": bookings['id'],
+        "bookings[0][eid]": slot['itemId'],
         "bookings[0][seat_id]": 0,
         "bookings[0][gid]": GID,
         "bookings[0][lid]": LID,
         "bookings[0][start]": slot['start'],
-        "bookings[0][end]": slot['end'],
+        "bookings[0][end]": end_time,
         "bookings[0][checksum]": original_checksum
     }
     r = requests.post(base_url, params=payload, headers=headers)
