@@ -1,13 +1,46 @@
 from discord.ext import commands
-from util import get_day
+from util import get_day, get_earliest_time
 import manage_db as db
 from api_calls import find_slots, make_booking, cancel_booking
 
 @commands.hybrid_command(name="reserve")
-async def reserve(ctx, earliest_time=None, min_duration=None):
+async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00:00"):
     if not db.user_exist(ctx.author.id):
         await ctx.send("Create an account first")
         return
+    
+    #parsing earliest_time and time_offset
+    if not earliest_time and not time_offset:
+        earliest_time = get_earliest_time()
+    elif not earliest_time and time_offset:
+        hour_offset, min_offset = None
+        if time_offset.contains(':'):
+            hour_offset = time_offset.split(':')[0]
+            min_offset = int(time_offset.split(':')[1])
+        else:
+            hour_offset = int(time_offset)
+            min_offset = 0
+        earliest_time = get_earliest_time(hour_offset, min_offset)
+    elif earliest_time and time_offset:
+        await ctx.send('Only have time_offset or earliest_time, pick one')
+        return
+    
+    if earliest_time.count(':') == 1:
+        earliest_time += ":00"
+    temp_time = ''
+    for time_value in earliest_time.split(':'):
+        temp_time += (time_value if len(time_value) == 2 else '0' + time_value) + ':'
+    earliest_time = temp_time[:-1]
+
+    if min_duration.count(':') == 1:
+        min_duration += ":00"
+    elif min_duration.count(':') == 0:
+        min_duration += ":00:00"
+    temp_duration = ''
+    for time_value in min_duration.split(':'):
+        temp_duration += (time_value if len(time_value) == 2 else '0' + time_value) + ':'
+    min_duration = temp_duration[:-1]
+
     requirements = {
         "earliest-start": f"{get_day()} {earliest_time}",
         "min-duration": min_duration
@@ -62,6 +95,7 @@ async def cancel(ctx):
     chosen_booking = int(user_response.content[1:]) - 1
 
     if cancel_booking(all_bookings[chosen_booking][0]):
+        db.delete_booking(all_bookings[chosen_booking][0])
         await ctx.send("Booking successfully canceled!")
     else:
         await ctx.send("Something went wrong :(")

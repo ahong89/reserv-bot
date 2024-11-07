@@ -22,3 +22,13 @@ def subtract_time(end_time, start_time):
     output += ":" + ("0" + str(min_value) if min_value < 10 else str(min_value))
     output += ":" + ("0" + str(sec_value)) if sec_value < 10 else str(sec_value)
     return output
+
+def get_earliest_time(hour_offset = 0, minutes_offset = 0):
+    time = datetime.now() + timedelta(hours=hour_offset, minutes=minutes_offset)
+    output = time.strftime("%H") + ":"
+    if int(time.strftime("%M")) >= 30:
+        output += "30"
+    else:
+        output += "00"
+    output += ":00"
+    return output
