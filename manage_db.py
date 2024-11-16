@@ -1,6 +1,6 @@
 import sqlite3
 
-connection = sqlite3.connect('user_data.db')
+connection = sqlite3.connect('db/user_data.sqlite')
 cursor = connection.cursor()
 
 def init_table():
@@ -26,6 +26,7 @@ def init_table():
     cursor.execute(init_users_command)
     cursor.execute(init_bookings_command)
     connection.commit()
+init_table()
 
 def delete_table():
     drop_command = """DROP TABLE users
