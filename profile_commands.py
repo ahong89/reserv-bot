@@ -42,7 +42,10 @@ async def view_profile(ctx):
         await ctx.send("Account doesn't exist")
         return
     user_data = db.get_user(ctx.author.id)
-    await ctx.send(str(user_data))
+    message = f"{user_data['fname']} {user_data['lname']}'s Profile:\n"
+    message += f"School UID: {user_data['school_uid']}\n"
+    message += f"Email: {user_data['email']}"
+    await ctx.send(message)
 
 async def query_user(ctx, attribute):
     await ctx.send(f"Enter your {attribute}")

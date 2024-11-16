@@ -8,22 +8,6 @@ import manage_db as db
 import profile_commands
 import reserv_commands
 
-# listen on a port for render lmao
-import socket
-import asyncio
-
-# Create a socket object
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Bind the socket to an address and port
-server_address = ('0.0.0.0', 10000)
-server_socket.bind(server_address)
-
-# Listen for incoming connections
-server_socket.listen(1)
-
-print('Server listening on {}:{}'.format(*server_address))
-
 def get_token():
     dotenv.load_dotenv()
     return os.getenv("BOT_TOKEN")
