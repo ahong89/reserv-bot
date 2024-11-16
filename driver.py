@@ -62,7 +62,7 @@ async def handle_client(reader, writer):
 
 # Function to start the server
 async def start_server():
-    server = await asyncio.start_server(handle_client, '0.0.0.0', 10000)
+    server = await asyncio.start_server(handle_client, '0.0.0.0', 8000)
     addr = server.sockets[0].getsockname()
     print(f"Listening on {addr}")
 

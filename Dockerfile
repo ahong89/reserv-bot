@@ -47,6 +47,6 @@ COPY . .
 # # Run the application.
 CMD python3 driver.py
 
-EXPOSE 10000
+EXPOSE 8000
 
 VOLUME /app/db
