@@ -46,3 +46,5 @@ COPY . .
 
 # # Run the application.
 CMD python3 driver.py
+
+VOLUME /app/db
