@@ -10,6 +10,7 @@ import reserv_commands
 
 # listen on a port for render lmao
 import socket
+import asyncio
 
 # Create a socket object
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -41,6 +42,40 @@ async def on_ready():
 
     await bot.tree.sync()
 
+async def handle_client(reader, writer):
+    addr = writer.get_extra_info('peername')
+    print(f"Connection from {addr}")
+    
+    # Example: Echo server logic
+    while True:
+        data = await reader.read(100)
+        if not data:
+            break
+        message = data.decode()
+        print(f"Received: {message}")
+        writer.write(data)
+        await writer.drain()
+
+    print(f"Connection closed from {addr}")
+    writer.close()
+    await writer.wait_closed()
+
+# Function to start the server
+async def start_server():
+    server = await asyncio.start_server(handle_client, '0.0.0.0', 10000)
+    addr = server.sockets[0].getsockname()
+    print(f"Listening on {addr}")
+
+    async with server:
+        await server.serve_forever()
+
+async def main():
+    bot_task = bot.start(get_token())
+    server_task = start_server()
+
+    # Run both tasks concurrently
+    await asyncio.gather(bot_task, server_task)
+
 if __name__ == "__main__":
-    bot.run(get_token())
+    asyncio.run(main())
     db.close_connection()

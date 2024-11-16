@@ -1,6 +1,6 @@
 import sqlite3
 
-connection = sqlite3.connect('db/user_data.sqlite')
+connection = sqlite3.connect('db/user_data.sqlite', check_same_thread=False)
 cursor = connection.cursor()
 
 def init_table():
