@@ -5,6 +5,7 @@ import json
 from util import get_day, subtract_time
 
 NUM_SHOWN_SLOTS = 3
+MAX_RESERVATION_HR = 4
 GID = 23067
 LID = 2552
 headers = {
@@ -46,12 +47,18 @@ def fit_requirements(available, requirements):
     best_fit = []
     for roomId in available.keys():
         for block in available[roomId]:
-            # print(block)
             if(block["start"] < requirements["earliest-start"]):
                 block["start"] = requirements["earliest-start"]
+            if(calc_duration(block) > "04:00:00"):
+                parsed_start = parse_time(block["start"])
+                hour = int(parsed_start['hour']) + MAX_RESERVATION_HR
+                hour = min(24, hour)
+                block["end"] = block["end"].split(' ')[0] + " "
+                block["end"] += f"0{hour}" if hour < 10 else str(hour)
+                block["end"] += ":" + (f"0{parsed_start['min']}" if parsed_start['min'] < 10 else str(parsed_start['min']))
+                block["end"] += ":" + (f"0{parsed_start['sec']}" if parsed_start['sec'] < 10 else str(parsed_start['sec']))
             fit_min_duration = calc_duration(block) >= requirements["min-duration"]
             fit_start_time = block["end"] > requirements["earliest-start"]
-            # print(block, fit_min_duration, fit_start_time)
             if fit_min_duration and fit_start_time:
                 block["duration"] = calc_duration(block)
                 best_fit.append(block)
@@ -61,6 +68,7 @@ def parse_time(slot_time):
     day_time = slot_time.split(" ")
     day = day_time[0].split("-")
     time = day_time[1].split(":")
+    print(time)
     output = {
         "year": int(day[0]),
         "month": int(day[1]),
