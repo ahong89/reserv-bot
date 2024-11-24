@@ -68,7 +68,6 @@ def parse_time(slot_time):
     day_time = slot_time.split(" ")
     day = day_time[0].split("-")
     time = day_time[1].split(":")
-    print(time)
     output = {
         "year": int(day[0]),
         "month": int(day[1]),
@@ -138,6 +137,7 @@ def find_checksum(slot):
         "end": get_day(day_offset=1) 
     }
     r = requests.post(base_url, params=payload, headers=headers)
+    print(r.url)
     print("First checksum:", r.text, end='\n\n')
     bookings = r.json()['bookings'][0]
     # check if end is correct otherwise make an adjustment
@@ -149,7 +149,7 @@ def find_checksum(slot):
     for i, option in enumerate(bookings['options']):
         if option == slot['end']:
             index = i
-    end_time = slot['end'].split(" ")[0] + " " + subtract_time(slot['end'].split(" ")[1], "00:30:00")
+    # end_time = slot['end'].split(" ")[0] + " " + subtract_time(slot['end'].split(" ")[1], "00:30:00")
     payload = {
         "update[id]": bookings['id'],
         "update[checksum]": bookings['optionChecksums'][index],
@@ -164,11 +164,12 @@ def find_checksum(slot):
         "bookings[0][gid]": GID,
         "bookings[0][lid]": LID,
         "bookings[0][start]": slot['start'],
-        "bookings[0][end]": end_time,
+        "bookings[0][end]": bookings['end'],
         "bookings[0][checksum]": original_checksum
     }
     r = requests.post(base_url, params=payload, headers=headers)
     print("Second checksum:", r.text)
+    print(r.url)
     new_checksum = r.json()['bookings'][0]['checksum']
     return new_checksum
 
@@ -201,10 +202,11 @@ def make_booking(user_data, slot):
     p = r.prepare()
     p.url += payload_str
     resp = session.send(p)
+    print(resp.text)
     if resp.status_code == 200:
         return resp.status_code, resp.json()['bookId']
     else:
-        return resp.status_code, 0
+        return resp.status_code, resp.text
 
 def cancel_booking(bookId):
     payload = {

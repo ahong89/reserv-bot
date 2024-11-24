@@ -71,7 +71,7 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
         await ctx.send("Reserveration Created! You should receieve an email shortly")
         db.add_booking(bookId, get_day(), slots[chosen_slot]["start"], slots[chosen_slot]["end"], ctx.author.id)
     else:
-        await ctx.send("Reservation failed... something went wrong, error code: " + str(status_code))
+        await ctx.send("Reservation failed... something went wrong, error code: " + str(status_code) + " " + bookId)
 
 @commands.hybrid_command(name="cancel")
 async def cancel(ctx):
@@ -93,7 +93,6 @@ async def cancel(ctx):
         return m.author.id == ctx.author.id and m.channel == ctx.channel
     user_response = await driver_bot.wait_for('message', check=check)
     chosen_booking = int(user_response.content[1:]) - 1
-
     if cancel_booking(all_bookings[chosen_booking][0]):
         db.delete_booking(all_bookings[chosen_booking][0])
         await ctx.send("Booking successfully canceled!")
