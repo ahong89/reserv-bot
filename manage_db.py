@@ -1,6 +1,10 @@
 import sqlite3
+import os
 
-connection = sqlite3.connect('db/user_data.sqlite', check_same_thread=False)
+dbpath = r'db' 
+if not os.path.exists(dbpath):
+    os.makedirs(dbpath)
+connection = sqlite3.connect(f'{dbpath}/user_data.sqlite')
 cursor = connection.cursor()
 
 def init_table():

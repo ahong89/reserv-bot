@@ -50,9 +50,9 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
     available_slots_msg = "Here's a list of 3 available slots that fit your requirements:\n\n"
     for i, s in enumerate(slots):
         available_slots_msg += f"Reservation #{i+1}: \n"
-        available_slots_msg += f"Start: {s["start"]} \n"
-        available_slots_msg += f"End: {s["end"]} \n"
-        available_slots_msg += f"Duration: {s["duration"]}"
+        available_slots_msg += f"Start: {s['start']} \n"
+        available_slots_msg += f"End: {s['end']} \n"
+        available_slots_msg += f"Duration: {s['duration']}"
         available_slots_msg += "\n\n"
     available_slots_msg += "Respond with #<number reservation you want>"
     await ctx.send(available_slots_msg)
