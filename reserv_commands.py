@@ -22,7 +22,7 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
             min_offset = 0
         earliest_time = get_earliest_time(hour_offset, min_offset)
     elif earliest_time and time_offset:
-        await ctx.send('Only have time_offset or earliest_time, pick one')
+        await ctx.send('Have both time_offset or earliest_time, pick one, ending command')
         return
     
     if earliest_time.count(':') == 1:
@@ -46,8 +46,11 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
         "min-duration": min_duration
     }
     slots = find_slots(requirements)
+    if len(slots) == 0:
+        await ctx.send('No slots are available right now with those constraints, check back later')
+        return
 
-    available_slots_msg = "Here's a list of 3 available slots that fit your requirements:\n\n"
+    available_slots_msg = f"Here's a list of {len(slots)} available slots that fit your requirements:\n\n"
     for i, s in enumerate(slots):
         available_slots_msg += f"Reservation #{i+1}: \n"
         available_slots_msg += f"Start: {s['start']} \n"
@@ -61,8 +64,8 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
     def check(m):
         return m.author.id == ctx.author.id and m.channel == ctx.channel
     user_response = await driver_bot.wait_for('message', check=check)
-    if user_response.content == "cancel":
-        await ctx.send("Reserveration Canceled")
+    if user_response.content[:1] != "#":
+        await ctx.send("Reserveration Canceled, respond with the correct format")
         return
     chosen_slot = int(user_response.content[1:]) - 1
 
@@ -71,7 +74,7 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
         await ctx.send("Reserveration Created! You should receieve an email shortly")
         db.add_booking(bookId, get_day(), slots[chosen_slot]["start"], slots[chosen_slot]["end"], ctx.author.id)
     else:
-        await ctx.send("Reservation failed... something went wrong, error code: " + str(status_code) + " " + bookId)
+        await ctx.send("Reservation failed... something went wrong, error: " + str(status_code) + " " + bookId)
 
 @commands.hybrid_command(name="cancel")
 async def cancel(ctx):
