@@ -2,7 +2,7 @@ import requests
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import json
-from util import get_day, subtract_time
+from util import get_day, subtract_time, add_days
 
 NUM_SHOWN_SLOTS = 3
 MAX_RESERVATION_HR = 4
@@ -12,7 +12,8 @@ headers = {
     "Referer": "https://umd.libcal.com/spaces?lid=2552&gid=23067&c=0"
 }
 
-def retrieve_data():
+def retrieve_data(requirements):
+    day = requirements['earliest-start'].split(' ')[0];
     payload = {
         "lid": LID,
         "gid": GID,
@@ -20,15 +21,14 @@ def retrieve_data():
         "seat": 0,
         "seatId": 0,
         "zone": 0,
-        "start": get_day(),
-        "end": get_day(day_offset=1),
+        "start": day,
+        "end": add_days(day, 1),
         "pageIndex": 0,
         "pageSize": 18
     }
     
     r = requests.post('https://umd.libcal.com/spaces/availability/grid', params=payload, headers=headers)
     all_slots = r.json()["slots"]
-    # print(all_slots)
 
     available_slots = {}
     for slot in all_slots:
@@ -40,7 +40,7 @@ def retrieve_data():
                     available_slots[slot["itemId"]].append(slot)
             else:
                 available_slots[slot["itemId"]] = [slot]
-
+    # print(available_slots)
     return available_slots
 
 def fit_requirements(available, requirements):
@@ -117,7 +117,7 @@ def reverse_duration(duration):
     return duration
 
 def find_slots(requirements):
-    available_slots = retrieve_data()
+    available_slots = retrieve_data(requirements)
     # print(available_slots)
     fitting_slots = fit_requirements(available_slots, requirements)
     sorted_slots = sort_slots(fitting_slots)
@@ -137,8 +137,8 @@ def find_checksum(slot):
         "end": get_day(day_offset=1) 
     }
     r = requests.post(base_url, params=payload, headers=headers)
-    print(r.url)
-    print("First checksum:", r.text, end='\n\n')
+    # print(r.url)
+    # print("First checksum:", r.text, end='\n\n')
     bookings = r.json()['bookings'][0]
     # check if end is correct otherwise make an adjustment
     original_checksum = bookings['checksum']
@@ -168,8 +168,8 @@ def find_checksum(slot):
         "bookings[0][checksum]": original_checksum
     }
     r = requests.post(base_url, params=payload, headers=headers)
-    print("Second checksum:", r.text)
-    print(r.url)
+    # print("Second checksum:", r.text)
+    # print(r.url)
     new_checksum = r.json()['bookings'][0]['checksum']
     return new_checksum
 
@@ -202,7 +202,7 @@ def make_booking(user_data, slot):
     p = r.prepare()
     p.url += payload_str
     resp = session.send(p)
-    print(resp.text)
+    # print(resp.text)
     if resp.status_code == 200:
         return resp.status_code, resp.json()['bookId']
     else:

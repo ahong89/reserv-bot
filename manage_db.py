@@ -56,6 +56,10 @@ def delete_profile(uid):
         delete_command = f"DELETE FROM users WHERE uid = {uid}"
         cursor.execute(delete_command)
         connection.commit()
+
+        delete_bookings_command = f"DELETE FROM bookings WHERE uid={uid}"
+        cursor.execute(delete_bookings_command)
+        connectionc.commit()
         return True
     else:
         return False
@@ -114,7 +118,7 @@ def get_all_bookings(uid):
 
 def delete_booking(bookId):
     delete_command = f"DELETE FROM bookings WHERE bookId='{bookId}'"
-    cursor.execute(delete_booking)
+    cursor.execute(delete_command)
     connection.commit()
 
 def close_connection():

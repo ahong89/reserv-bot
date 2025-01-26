@@ -4,14 +4,17 @@ import manage_db as db
 from api_calls import find_slots, make_booking, cancel_booking
 
 @commands.hybrid_command(name="reserve")
-async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00:00"):
+async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00:00", day=get_day()):
     if not db.user_exist(ctx.author.id):
         await ctx.send("Create an account first")
         return
     
     #parsing earliest_time and time_offset
     if not earliest_time and not time_offset:
-        earliest_time = get_earliest_time()
+        if(day != get_day()):
+            earliest_time = '00:00:00'
+        else:
+            earliest_time = get_earliest_time()
     elif not earliest_time and time_offset:
         hour_offset, min_offset = None
         if time_offset.contains(':'):
@@ -41,10 +44,15 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
         temp_duration += (time_value if len(time_value) == 2 else '0' + time_value) + ':'
     min_duration = temp_duration[:-1]
 
+    if day.count('-') != 2:
+        await ctx.send('Incorrect formatting for day. Use YYYY-MM-DD')
+        return
+
     requirements = {
-        "earliest-start": f"{get_day()} {earliest_time}",
+        "earliest-start": f"{day} {earliest_time}",
         "min-duration": min_duration
     }
+    print(requirements)
     slots = find_slots(requirements)
     if len(slots) == 0:
         await ctx.send('No slots are available right now with those constraints, check back later')

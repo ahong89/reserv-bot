@@ -32,3 +32,8 @@ def get_earliest_time(hour_offset = 0, minutes_offset = 0):
         output += "00"
     output += ":00"
     return output
+
+def add_days(start_date, days_add):
+    time = datetime.strptime(start_date, "%Y-%m-%d")
+    return time + timedelta(days=days_add)
+    
