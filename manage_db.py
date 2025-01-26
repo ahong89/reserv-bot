@@ -57,9 +57,9 @@ def delete_profile(uid):
         cursor.execute(delete_command)
         connection.commit()
 
-        delete_bookings_command = f"DELETE FROM bookings WHERE uid={uid}"
+        delete_bookings_command = f"DELETE FROM bookings WHERE discord_uid={uid}"
         cursor.execute(delete_bookings_command)
-        connectionc.commit()
+        connection.commit()
         return True
     else:
         return False

@@ -97,12 +97,15 @@ async def cancel(ctx):
         all_bookings_msg += "BookId: " + book[0] + "\n"
         all_bookings_msg += "Start Time: " + book[2] + "\n"
         all_bookings_msg += "End Time: " + book[3] + "\n"
-    all_bookings_msg += "Repond with #<number booking you want to cancel>"
+    all_bookings_msg += "Repond with #<number booking you want to cancel> (or \"stop\" to stop)"
     await ctx.send(all_bookings_msg)
 
     def check(m):
         return m.author.id == ctx.author.id and m.channel == ctx.channel
     user_response = await driver_bot.wait_for('message', check=check)
+    if user_response.content == "stop":
+        await ctx.send("Cancellation stopped")
+        return
     chosen_booking = int(user_response.content[1:]) - 1
     if cancel_booking(all_bookings[chosen_booking][0]):
         db.delete_booking(all_bookings[chosen_booking][0])
