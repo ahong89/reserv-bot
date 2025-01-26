@@ -37,7 +37,7 @@ jobs:
         known_hosts: ${{ secrets.GCP_VM_IP }}
     - name: Deploy to Google Cloud VM
       run: |
-        ssh -o StrictHostKeyChecking=no ahong89@${{ secrets.GCP_VM_IP }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no 104958815820110008684@${{ secrets.GCP_VM_IP }} << 'EOF'
         docker pull ahong89/reserv-bot:latest
         docker stop reserv-container || true
         docker rm reserv-container || true
