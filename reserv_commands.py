@@ -52,7 +52,7 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
         "earliest-start": f"{day} {earliest_time}",
         "min-duration": min_duration
     }
-    print(requirements)
+    # print(requirements)
     slots = find_slots(requirements)
     if len(slots) == 0:
         await ctx.send('No slots are available right now with those constraints, check back later')
@@ -65,7 +65,7 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
         available_slots_msg += f"End: {s['end']} \n"
         available_slots_msg += f"Duration: {s['duration']}"
         available_slots_msg += "\n\n"
-    available_slots_msg += "Respond with #<number reservation you want>"
+    available_slots_msg += "Respond with #<number reservation you want> (or \"stop\" to cancel)"
     await ctx.send(available_slots_msg)
     user_data = db.get_user(ctx.author.id)
 
