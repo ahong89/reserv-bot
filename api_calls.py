@@ -32,7 +32,7 @@ def retrieve_data(requirements):
 
     available_slots = {}
     for slot in all_slots:
-        if "className" not in slot.keys():
+        if "className" not in slot.keys() and slot["start"] >= requirements['earliest-start']:
             if slot["itemId"] in available_slots.keys():
                 if available_slots[slot["itemId"]][-1]["end"] == slot["start"]:
                     available_slots[slot["itemId"]][-1]["end"] = slot["end"]
@@ -129,15 +129,16 @@ def find_checksum(slot):
         "add[eid]": slot['itemId'],
         "add[gid]": GID,
         'add[lid]': LID,
-        "add[start]": slot['start'],
+        "add[start]": slot['start'][:-3],
         "add[checksum]": slot['checksum'],
         "lid": LID,
         "gid": GID,
-        "start": get_day(),
-        "end": get_day(day_offset=1) 
+        "start": slot['start'].split(' ')[0],
+        "end": add_days(slot['start'].split(' ')[0], 1)
     }
     r = requests.post(base_url, params=payload, headers=headers)
     # print(r.url)
+    # print("Payload: ", payload)
     # print("First checksum:", r.text, end='\n\n')
     bookings = r.json()['bookings'][0]
     # check if end is correct otherwise make an adjustment
@@ -156,8 +157,8 @@ def find_checksum(slot):
         "update[end]": slot['end'],
         "lid": LID,
         "gid": GID,
-        "start": get_day(),
-        "end": get_day(1),
+        "start": slot['start'].split(' ')[0],
+        "end": add_days(slot['start'].split(' ')[0], 1),
         "bookings[0][id]": bookings['id'],
         "bookings[0][eid]": slot['itemId'],
         "bookings[0][seat_id]": 0,
@@ -177,7 +178,7 @@ def make_booking(user_data, slot):
     payload = user_data
     payload["q16114"] = user_data["school_uid"]
     payload['method'] = 11
-
+    # print(slot)
     booking_data = {
         "id": 1,
         "eid": slot['itemId'],
