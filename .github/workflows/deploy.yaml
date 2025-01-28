@@ -41,6 +41,7 @@ jobs:
         docker pull ahong89/reserv-bot:latest
         docker stop reserv-container || true
         docker image prune -f || true
+        docker rm -f reserv-container || true
         docker run -d --name reserv-container -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} -v reserv-db:/app/db ahong89/reserv-bot:latest
         EOF
 
