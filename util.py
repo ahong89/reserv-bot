@@ -1,7 +1,11 @@
 from datetime import datetime, timedelta
+import pytz
+
+timezone_name = 'America/New_York'
+timezone = pytz.tiemzone(timezone_name)
 
 def get_day(day_offset = 0):
-    time = datetime.now() + timedelta(days=day_offset) 
+    time = datetime.now(timezone) + timedelta(days=day_offset) 
     return time.strftime("%Y-%m-%d")
 
 def subtract_time(end_time, start_time):
@@ -24,7 +28,7 @@ def subtract_time(end_time, start_time):
     return output
 
 def get_earliest_time(hour_offset = 0, minutes_offset = 0):
-    time = datetime.now() + timedelta(hours=hour_offset, minutes=minutes_offset)
+    time = datetime.now(timezone) + timedelta(hours=hour_offset, minutes=minutes_offset)
     output = time.strftime("%H") + ":"
     if int(time.strftime("%M")) >= 30:
         output += "30"
