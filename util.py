@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import pytz
 
 timezone_name = 'America/New_York'
-timezone = pytz.tiemzone(timezone_name)
+timezone = pytz.timezone(timezone_name)
 
 def get_day(day_offset = 0):
     time = datetime.now(timezone) + timedelta(days=day_offset) 
