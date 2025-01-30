@@ -5,6 +5,7 @@ from api_calls import find_slots, make_booking, cancel_booking
 
 @commands.hybrid_command(name="reserve")
 async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00:00", day=get_day()):
+    print(day)
     if not db.user_exist(ctx.author.id):
         await ctx.send("Create an account first")
         return
