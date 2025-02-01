@@ -1,8 +1,6 @@
 import requests
-from urllib.request import urlopen
 from bs4 import BeautifulSoup
-import json
-from util import get_day, subtract_time, add_days
+from util import add_days
 
 NUM_SHOWN_SLOTS = 3
 MAX_RESERVATION_HR = 4
