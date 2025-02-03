@@ -4,8 +4,7 @@ import manage_db as db
 from api_calls import find_slots, make_booking, cancel_booking
 
 @commands.hybrid_command(name="reserve")
-async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00:00", day=get_day()):
-    await ctx.send("I think the day is: " + str(day))
+async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00:00", day="UNASSIGNED"):
     if not db.user_exist(ctx.author.id):
         await ctx.send("Create an account first")
         return
@@ -45,7 +44,9 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
         temp_duration += (time_value if len(time_value) == 2 else '0' + time_value) + ':'
     min_duration = temp_duration[:-1]
 
-    if day.count('-') != 2:
+    if day == "UNASSIGNED":
+        day = get_day()
+    elif day.count('-') != 2:
         await ctx.send('Incorrect formatting for day. Use YYYY-MM-DD')
         return
 
