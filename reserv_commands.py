@@ -4,7 +4,7 @@ import manage_db as db
 from api_calls import find_slots, make_booking, cancel_booking
 
 @commands.hybrid_command(name="reserve")
-async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00:00", day="UNASSIGNED"):
+async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00:00", max_duration="04:00:00", day="UNASSIGNED"):
     if not db.user_exist(ctx.author.id):
         await ctx.send("Create an account first")
         return
@@ -52,7 +52,8 @@ async def reserve(ctx, earliest_time=None, time_offset=None, min_duration="01:00
 
     requirements = {
         "earliest-start": f"{day} {earliest_time}",
-        "min-duration": min_duration
+        "min-duration": min_duration,
+        "max-duration": max_duration,
     }
     # print(requirements)
     slots = find_slots(requirements)

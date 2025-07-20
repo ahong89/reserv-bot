@@ -5,7 +5,6 @@ import json
 from util import get_day, subtract_time, add_days
 
 NUM_SHOWN_SLOTS = 3
-MAX_RESERVATION_HR = 4
 GID = 23067
 LID = 2552
 headers = {
@@ -49,13 +48,18 @@ def fit_requirements(available, requirements):
         for block in available[roomId]:
             if(block["start"] < requirements["earliest-start"]):
                 block["start"] = requirements["earliest-start"]
-            if(calc_duration(block) > "04:00:00"):
+            if(calc_duration(block) > requirements["max-duration"]):
                 parsed_start = parse_time(block["start"])
-                hour = int(parsed_start['hour']) + MAX_RESERVATION_HR
+                parsed_max_duration = requirements["max-duration"].split(":")
+                hour = int(parsed_start['hour']) + int(parsed_max_duration[0])
+                mins = int(parsed_start['min']) + int(parsed_max_duration[1])
+                if mins == 60:
+                    hour += 1
+                    mins = 0
                 hour = min(24, hour)
                 block["end"] = block["end"].split(' ')[0] + " "
                 block["end"] += f"0{hour}" if hour < 10 else str(hour)
-                block["end"] += ":" + (f"0{parsed_start['min']}" if parsed_start['min'] < 10 else str(parsed_start['min']))
+                block["end"] += ":" + (f"0{mins}" if mins < 10 else str(mins))
                 block["end"] += ":" + (f"0{parsed_start['sec']}" if parsed_start['sec'] < 10 else str(parsed_start['sec']))
             fit_min_duration = calc_duration(block) >= requirements["min-duration"]
             fit_start_time = block["end"] > requirements["earliest-start"]
